@@ -17,7 +17,7 @@ type Item interface {
 type Node struct {
 	size        uint64
 	left, right *Node
-	key         Item
+	item        Item
 	value       string
 	color       bool
 }
@@ -30,12 +30,12 @@ func (t *RedBlackTree) Size() uint64 {
 	return t.root.Size()
 }
 
-func (n *RedBlackTree) Put(key Item, value string) {
-	n.root = put(n.root, key, value)
+func (n *RedBlackTree) Put(key Item) {
+	n.root = put(n.root, key)
 	n.root.color = BLACK
 }
 
-func (n *RedBlackTree) Find(key Item) (string, bool) {
+func (n *RedBlackTree) Find(key Item) (Item, bool) {
 	return find(n.root, key)
 }
 
@@ -43,12 +43,8 @@ func (n *Node) Size() uint64 {
 	return n.size
 }
 
-func (n *Node) Value() string {
-	return n.value
-}
-
-func (n *Node) Key() Item {
-	return n.key
+func (n *Node) Item() Item {
+	return n.item
 }
 
 func size(n *Node) uint64 {
@@ -59,17 +55,17 @@ func size(n *Node) uint64 {
 	return n.size
 }
 
-func put(n *Node, key Item, value string) *Node {
+func put(n *Node, item Item) *Node {
 	switch {
 	case n == nil:
-		node := Node{key: key, value: value, size: 1, color: RED}
+		node := Node{item: item, size: 1, color: RED}
 		return &node
-	case key.Less(n.key):
-		n.left = put(n.left, key, value)
-	case n.key.Less(key):
-		n.right = put(n.right, key, value)
+	case item.Less(n.item):
+		n.left = put(n.left, item)
+	case n.item.Less(item):
+		n.right = put(n.right, item)
 	default:
-		n.value = value
+		n.item = item
 	}
 
 	if !isRed(n.left) && isRed(n.right) {
@@ -88,19 +84,19 @@ func put(n *Node, key Item, value string) *Node {
 	return n
 }
 
-func find(n *Node, key Item) (string, bool) {
+func find(n *Node, item Item) (Item, bool) {
 	switch {
 	case n == nil:
-		return "", false
-	case n.key == key:
-		return n.Value(), true
-	case key.Less(n.key):
-		return find(n.left, key)
-	case n.key.Less(key):
-		return find(n.right, key)
+		return nil, false
+	case item.Less(n.item):
+		return find(n.left, item)
+	case item.More(n.item):
+		return find(n.right, item)
+	default:
+		return n.Item(), true
 	}
 
-	return "", false
+	return nil, false
 }
 
 func rotateLeft(n *Node) *Node {
@@ -143,14 +139,4 @@ func isRed(n *Node) bool {
 	}
 
 	return n.color
-}
-
-type Int int
-
-func (i Int) Less(item Item) bool {
-	return i < item.(Int)
-}
-
-func (i Int) More(item Item) bool {
-	return i > item.(Int)
 }
