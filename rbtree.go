@@ -58,8 +58,7 @@ func size(n *Node) uint64 {
 func put(n *Node, item Item) *Node {
 	switch {
 	case n == nil:
-		node := Node{item: item, size: 1, color: RED}
-		return &node
+		return &Node{item: item, size: 1, color: RED}
 	case item.Less(n.item):
 		n.left = put(n.left, item)
 	case n.item.Less(item):
